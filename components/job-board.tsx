@@ -1,14 +1,6 @@
 "use client";
 
-import {
-  useState,
-  useMemo,
-  AwaitedReactNode,
-  JSXElementConstructor,
-  Key,
-  ReactElement,
-  ReactNode,
-} from "react";
+import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -28,6 +20,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Badge } from "@/components/ui/badge";
 
 const industries = [
   "Technology",
@@ -98,6 +91,7 @@ const jobPostings = [
     licensuresAndCertifications: ["CISSP"],
     description:
       "We are seeking a talented Software Engineer to join our team...",
+    sponsored: true,
   },
   {
     id: 2,
@@ -110,6 +104,7 @@ const jobPostings = [
     experience: "1-3 years",
     licensuresAndCertifications: ["CDL"],
     description: "Experienced truck driver needed for long-haul routes...",
+    sponsored: false,
   },
   {
     id: 3,
@@ -123,6 +118,7 @@ const jobPostings = [
     licensuresAndCertifications: ["RN"],
     description:
       "Join our team of dedicated nurses in providing excellent patient care...",
+    sponsored: true,
   },
   {
     id: 4,
@@ -136,6 +132,7 @@ const jobPostings = [
     licensuresAndCertifications: ["CPA"],
     description:
       "Seeking a detail-oriented financial analyst to join our team...",
+    sponsored: false,
   },
   {
     id: 5,
@@ -148,10 +145,11 @@ const jobPostings = [
     experience: "1-3 years",
     licensuresAndCertifications: ["Teaching License"],
     description: "Passionate educator needed to teach high school students...",
+    sponsored: false,
   },
 ];
 
-export function JobBoardComponent() {
+export default function JobBoard() {
   const [industry, setIndustry] = useState("All");
   const [distance, setDistance] = useState(50);
   const [degreeLevel, setDegreeLevel] = useState("All");
@@ -187,6 +185,10 @@ export function JobBoardComponent() {
   const availableDegreeTypes = useMemo(() => {
     return degreeLevel === "All" ? [] : degreeTypes[degreeLevel] || [];
   }, [degreeLevel]);
+
+  const sponsoredJobs = useMemo(() => {
+    return jobPostings.filter((job) => job.sponsored);
+  }, []);
 
   return (
     <div className="container mx-auto p-4">
@@ -264,25 +266,11 @@ export function JobBoardComponent() {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="All">All Types</SelectItem>
-                      {availableDegreeTypes.map(
-                        (
-                          type:
-                            | boolean
-                            | ReactElement<
-                                unknown,
-                                string | JSXElementConstructor<any>
-                              >
-                            | Iterable<ReactNode>
-                            | Promise<AwaitedReactNode>
-                            | Key
-                            | null
-                            | undefined
-                        ) => (
-                          <SelectItem key={type} value={type}>
-                            {type}
-                          </SelectItem>
-                        )
-                      )}
+                      {availableDegreeTypes.map((type) => (
+                        <SelectItem key={type} value={type}>
+                          {type}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
@@ -325,28 +313,69 @@ export function JobBoardComponent() {
           </Card>
         </aside>
         <main className="w-full md:w-3/4">
+          <Card className="mb-6">
+            <CardHeader>
+              <CardTitle>Sponsored Listings</CardTitle>
+              <CardDescription>
+                Want your job to appear here?{" "}
+                <Button variant="link" className="p-0">
+                  Sponsor your listing
+                </Button>
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {sponsoredJobs.map((job) => (
+                  <Card key={job.id}>
+                    <CardHeader>
+                      <div className="flex justify-between items-center">
+                        <CardTitle>{job.title}</CardTitle>
+                        <Badge variant="secondary">Sponsored</Badge>
+                      </div>
+                      <CardDescription>
+                        {job.company} - {job.location}
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-sm text-gray-500 mb-2">
+                        Industry: {job.industry} | Degree: {job.degreeLevel} in{" "}
+                        {job.degreeType} | Experience: {job.experience}
+                      </p>
+                      <p className="text-sm text-gray-500 mb-2">
+                        Required: {job.licensuresAndCertifications.join(", ")}
+                      </p>
+                      <p>{job.description}</p>
+                      <Button className="mt-4">Apply Now</Button>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
           <div className="space-y-4">
-            {filteredJobs.map((job) => (
-              <Card key={job.id}>
-                <CardHeader>
-                  <CardTitle>{job.title}</CardTitle>
-                  <CardDescription>
-                    {job.company} - {job.location}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-gray-500 mb-2">
-                    Industry: {job.industry} | Degree: {job.degreeLevel} in{" "}
-                    {job.degreeType} | Experience: {job.experience}
-                  </p>
-                  <p className="text-sm text-gray-500 mb-2">
-                    Required: {job.licensuresAndCertifications.join(", ")}
-                  </p>
-                  <p>{job.description}</p>
-                  <Button className="mt-4">Apply Now</Button>
-                </CardContent>
-              </Card>
-            ))}
+            {filteredJobs
+              .filter((job) => !job.sponsored)
+              .map((job) => (
+                <Card key={job.id}>
+                  <CardHeader>
+                    <CardTitle>{job.title}</CardTitle>
+                    <CardDescription>
+                      {job.company} - {job.location}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-gray-500 mb-2">
+                      Industry: {job.industry} | Degree: {job.degreeLevel} in{" "}
+                      {job.degreeType} | Experience: {job.experience}
+                    </p>
+                    <p className="text-sm text-gray-500 mb-2">
+                      Required: {job.licensuresAndCertifications.join(", ")}
+                    </p>
+                    <p>{job.description}</p>
+                    <Button className="mt-4">Apply Now</Button>
+                  </CardContent>
+                </Card>
+              ))}
           </div>
         </main>
       </div>

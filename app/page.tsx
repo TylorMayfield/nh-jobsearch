@@ -1,9 +1,9 @@
-import { JobBoardComponent } from "@/components/job-board";
+import JobBoard from "@/components/job-board";
 
 export default function Home() {
   return (
     <div>
-      <JobBoardComponent />
+      <JobBoard />
     </div>
   );
 }
